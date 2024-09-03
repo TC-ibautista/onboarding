@@ -9,10 +9,6 @@ namespace ToDo
 
         static void Main(string[] args)
         {
-            const int addTask = 1;
-            const int removeTask = 2; 
-            const int consultTasks = 3; 
-            const int exit = 4;
             int menuOption = 0;
 
             do
@@ -20,19 +16,19 @@ namespace ToDo
                 menuOption = ShowMainMenu();
                 switch (menuOption)
                 {
-                    case addTask:
+                    case (int)MenuOption.AddTask:
                         ShowMenuAdd();
                         break;
 
-                    case removeTask:
+                    case (int)MenuOption.RemoveTask:
                         ShowMenuRemove();
                         break;
 
-                    case consultTasks:
+                    case (int)MenuOption.ConsultTasks:
                         ShowMenuConsult();
                         break;
 
-                    case exit:
+                    case (int)MenuOption.Exit:
                         Console.WriteLine("See you!");
                         break;
 
@@ -40,7 +36,7 @@ namespace ToDo
                         Console.WriteLine("Option not allowed, try again");
                         break;
                 }
-            } while (menuOption != exit);
+            } while (menuOption != (int)MenuOption.Exit);
         }
         
         /// <summary>
@@ -60,10 +56,6 @@ namespace ToDo
             return Convert.ToInt32(optionSelected);
         }
 
-        /// <summary>
-        /// Allows the user to remove one task from the list
-        /// </summary>
-        /// <returns> void </returns>
         public static void ShowMenuRemove()
         {
             try
@@ -98,10 +90,6 @@ namespace ToDo
             }
         }
 
-        /// <summary>
-        /// Allows the user to add one task to the list
-        /// </summary>
-        /// <returns> void </returns>
         public static void ShowMenuAdd()
         {
             try
@@ -117,10 +105,6 @@ namespace ToDo
             }
         }
 
-        /// <summary>
-        /// Verify if there are tasks in the list and then show them
-        /// </summary>
-        /// <returns> void </returns>
         public static void ShowMenuConsult()
         {
             if (TaskList == null || TaskList.Count == 0)
@@ -133,16 +117,20 @@ namespace ToDo
             }
         }
 
-        /// <summary>
-        /// Show all the task of the list
-        /// </summary>
-        /// <returns> void </returns>
         public static void ShowCurrentTasks()
         {
             Console.WriteLine("----------------------------------------");
             var indexTask = 1;
             TaskList.ForEach(task => Console.WriteLine((indexTask++) + ". " + task));
             Console.WriteLine("----------------------------------------");
+        }
+
+        private enum MenuOption
+        {
+            AddTask = 1,
+            RemoveTask = 2,
+            ConsultTasks = 3,
+            Exit = 4
         }
     }
 }
