@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ToDo
 {
@@ -7,6 +8,7 @@ namespace ToDo
     {
         public static List<string> TaskList { get; set; } = new List<string>();
 
+        [ExcludeFromCodeCoverage]
         static void Main(string[] args)
         {
             int menuOption = 0;
@@ -43,6 +45,7 @@ namespace ToDo
         /// Shows the tasks options to redirect to the selected menu
         /// </summary>
         /// <returns> Returns option selected by user </returns>
+        [ExcludeFromCodeCoverage]
         public static int ShowMainMenu()
         {
             Console.WriteLine("----------------------------------------");

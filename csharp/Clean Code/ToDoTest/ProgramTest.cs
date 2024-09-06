@@ -42,7 +42,27 @@ public class ProgramTest
 
         // Act
         Program.ShowMenuRemove();
-        
+
+        // Assert
+        var actualOutput = stringWriter.ToString();
+        Assert.Equal(expectedOutput, actualOutput);
+    }
+
+    [Fact]
+    public void ShowMenuRemove_Exception() {
+        // Arrange
+        Program.TaskList.Add("Task 1");
+        Program.TaskList.Add("Task 2");
+        stringReader = new StringReader("a");
+        Console.SetIn(stringReader);
+        var expectedOutput = 
+            "Enter the number of the task to remove: " + Environment.NewLine +
+            testTaskList +
+            "An error occurred while deleting the task" + Environment.NewLine;
+
+        // Act
+        Program.ShowMenuRemove();
+
         // Assert
         var actualOutput = stringWriter.ToString();
         Assert.Equal(expectedOutput, actualOutput);
@@ -89,9 +109,10 @@ public class ProgramTest
     }
 
     [Fact]
-    public void ShowMenuConsult_NoTasks()
+    public void ShowMenuConsult_TaskListIsEmpy()
     {
         // Arrange
+        Program.TaskList = new List<string>();
         var expectedOutput = "There are no tasks to perform" + Environment.NewLine;
 
         // Act
@@ -118,4 +139,3 @@ public class ProgramTest
         Assert.Equal(expectedOutput, actualOutput);
     }
 }
-
