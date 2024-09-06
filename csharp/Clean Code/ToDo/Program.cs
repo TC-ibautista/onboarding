@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ToDo
 {
-    internal class Program
+    public class Program
     {
         public static List<string> TaskList { get; set; } = new List<string>();
 
