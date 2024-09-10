@@ -3,9 +3,9 @@
 
 -export([init/2]).
 
-init(Req, State) ->
-    {ok, Req2} = cowboy_req:reply(200,
+init(Req0, State) ->
+    Req = cowboy_req:reply(200,
         #{<<"content-type">> => <<"text/plain">>},
         <<"Hello, Cowboy!">>,
-        Req),
-    {ok, Req2, State}.
+        Req0),
+    {ok, Req, State}.
