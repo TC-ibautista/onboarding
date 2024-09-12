@@ -32,9 +32,9 @@ handle_cowboy(Req0, State) ->
 
 handle_get_items(Req0, State) ->
     Items = [
-        #{id => 1, name => <<"Item 1">>},
-        #{id => 2, name => <<"Item 2">>},
-        #{id => 3, name => <<"Item 3">>}
+        #{id => 1, name => <<"Item 1">>, price => 100},
+        #{id => 2, name => <<"Item 2">>, price => 200},
+        #{id => 3, name => <<"Item 3">>, price => 300}
     ],
     Json = jsx:encode(Items),
     Req = cowboy_req:reply(200,
