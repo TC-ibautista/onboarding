@@ -6,7 +6,7 @@
 start(_StartType, _StartArgs) ->
     Dispatch = cowboy_router:compile([
         {'_', [
-            {"/cowboy", api_cowboy_handler, []},
+            {"/", api_cowboy_handler, []},
             {"/api/v1/items", api_cowboy_handler, []},
             {"/api/v1/items/:id", api_cowboy_handler, []}
         ]}

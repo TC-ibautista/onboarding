@@ -7,7 +7,7 @@ init(Req0, State) ->
     Method = cowboy_req:method(Req0),
     Path = cowboy_req:path(Req0),
     case {Method, Path} of
-        {<<"GET">>, <<"/cowboy">>} ->
+        {<<"GET">>, <<"/">>} ->
             handle_cowboy(Req0, State);
         {<<"GET">>, <<"/api/v1/items">>} ->
             handle_get_items(Req0, State);
@@ -50,6 +50,10 @@ handle_post_items(Req0, State) ->
 
     Name = maps:get(<<"name">>, ParsedBody),
     Result = <<"Item ", Name/binary, " created successfully">>,
+
+    %% Connect to Redis and store the item
+    % Client = connect_to_redis(),
+    % ok = eredis:q(Client, ["SET", Name, Result]),
 
     Req = cowboy_req:reply(201, #{<<"content-type">> => <<"application/json">>},
         Result,
@@ -103,3 +107,9 @@ handle_method_not_allowed(Req0, State) ->
         <<"Method Not Allowed">>,
         Req0),
     {ok, Req, State}.
+
+connect_to_redis() ->
+    RedisHost = os:getenv("REDIS_HOST"),
+    RedisPort = os:getenv("REDIS_PORT"),
+    {ok, Client} = eredis:start_link([{host, RedisHost}, {port, RedisPort}]),
+    Client.
