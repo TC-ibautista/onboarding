@@ -8,7 +8,7 @@ start(_StartType, _StartArgs) ->
         {'_', [
             {"/", api_cowboy_handler, []},
             {"/api/v1/items", api_cowboy_handler, []},
-            {"/api/v1/items/:id", api_cowboy_handler, []}
+            {"/api/v1/items/:name", api_cowboy_handler, []}
         ]}
     ]),
     api_cowboy_sup:start_link(Dispatch).
