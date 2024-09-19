@@ -26,120 +26,68 @@ init(Req0, State) ->
     end.
 
 handle_root(Req0, State) ->
-    Req = cowboy_req:reply(200,
-        #{<<"content-type">> => <<"text/plain">>},
-        <<"Welcome to the API Cowboy!">>,
-        Req0),
-    {ok, Req, State}.
+    send_response(Req0, 200, <<"Welcome to the API Cowboy!">>, <<"text/plain">>, State).
 
 handle_get_items(Req0, State) ->
-    {ok, Client} = connect_to_redis(),
-    {ok, Keys} = eredis:q(Client, ["KEYS", "*"]),
-    Items = [{Key, jsx:decode(Value)} || Key <- Keys, {ok, Value} <- [eredis:q(Client, ["GET", Key])]],
-    ItemsWithKeys = [#{<<"key">> => Key, <<"value">> => Value} || {Key, Value} <- Items],
-    Json = jsx:encode(ItemsWithKeys),
-
-    Req = cowboy_req:reply(200,
-        #{<<"content-type">> => <<"application/json">>},
-        Json,
-        Req0),
-    {ok, Req, State}.
+    case info_handler:get_all_items() of
+        {ok, Response} ->
+            send_response(Req0, 200, Response, <<"application/json">>, State);
+        {error, Reason} ->
+            send_response(Req0, 500, Reason, <<"text/plain">>, State)
+    end.
 
 handle_get_item(Req0, State, ItemName) ->
-    {ok, Client} = connect_to_redis(),
-    {ok, Value} = eredis:q(Client, ["GET", ItemName]),
-    case Value of
-        undefined ->
-            Req = cowboy_req:reply(404,
-                #{<<"content-type">> => <<"text/plain">>},
-                <<"Item not found">>,
-                Req0),
-            {ok, Req, State};
-        _ ->
-            Req = cowboy_req:reply(200,
-                #{<<"content-type">> => <<"application/json">>},
-                Value,
-                Req0),
-            {ok, Req, State}
+    case info_handler:get_item(ItemName) of
+        {ok, Response } ->
+            send_response(Req0, 200, Response, <<"application/json">>, State);
+        {error, <<"Item not found">>} ->
+            send_response(Req0, 404, <<"Item not found">>, <<"text/plain">>, State);
+        {error, Reason} ->
+            send_response(Req0, 500, Reason, <<"application/json">>, State)
     end.
 
 handle_post_items(Req0, State) ->
     {ok, Body, _} = cowboy_req:read_body(Req0),
-    ParsedList = jsx:decode(Body),
-    ParsedBody = maps:from_list(ParsedList),
-
-    Name = maps:get(<<"name">>, ParsedBody),
-    {ok, Client} = connect_to_redis(),
-    {ok, <<"OK">>} = eredis:q(Client, ["SET", Name, jsx:encode(ParsedBody)]),
-
-    Result = <<"Item ", Name/binary, " created successfully">>,
-    Req = cowboy_req:reply(201, #{<<"content-type">> => <<"application/json">>},
-        Result,
-        Req0),
-    {ok, Req, State}.
+    case info_handler:create_item(Body) of
+        {ok, Response} ->
+            send_response(Req0, 201, Response, <<"application/json">>, State);
+        {error, Reason} ->
+            send_response(Req0, 500, Reason, <<"text/plain">>, State)
+    end.
 
 handle_put_item(Req0, State, ItemName) ->
     {ok, Body, _} = cowboy_req:read_body(Req0),
-    ParsedList = jsx:decode(Body),
-    ParsedBody = maps:from_list(ParsedList),
-
-    {ok, Client} = connect_to_redis(),
-    {ok, <<"OK">>} = eredis:q(Client, ["SET", ItemName, jsx:encode(ParsedBody)]),
-    Result = <<"Item ", ItemName/binary, " updated successfully">>,
-
-    Req = cowboy_req:reply(200, #{<<"content-type">> => <<"application/json">>},
-        Result,
-        Req0),
-    {ok, Req, State}.
+    case info_handler:update_item(ItemName, Body) of
+        {ok, Response} ->
+            send_response(Req0, 200, Response, <<"application/json">>, State);
+        {error, Reason} ->
+            send_response(Req0, 500, Reason, <<"application/json">>, State)
+    end.
 
 handle_patch_item_price(Req0, State, ItemName) ->
     {ok, Body, _} = cowboy_req:read_body(Req0),
-    ParsedList = jsx:decode(Body),
-    ParsedBody = maps:from_list(ParsedList),
-
-    {ok, Client} = connect_to_redis(),
-    {ok, Value} = eredis:q(Client, ["GET", ItemName]),
-
-    CurrentItem = maps:from_list(jsx:decode(Value)),
-    NewPrice = maps:get(<<"price">>, ParsedBody, maps:get(<<"price">>, CurrentItem)),
-    UpdatedItem = maps:put(<<"price">>, NewPrice, CurrentItem),
-
-    {ok, <<"OK">>} = eredis:q(Client, ["SET", ItemName, jsx:encode(UpdatedItem)]),
-    Result = <<"Item ", ItemName/binary, " updated successfully">>,
-
-    Req = cowboy_req:reply(200, #{<<"content-type">> => <<"application/json">>},
-        Result,
-        Req0),
-    {ok, Req, State}.
+    case info_handler:patch_item_price(ItemName, Body) of
+        {ok, Response} ->
+            send_response(Req0, 200, Response, <<"application/json">>, State);
+        {error, <<"Item not found">>} ->
+            send_response(Req0, 404, <<"Item not found">>, <<"text/plain">>, State);
+        {error, Reason} ->
+            send_response(Req0, 500, Reason, <<"application/json">>, State)
+    end.
 
 handle_delete_item(Req0, State, ItemName) ->
-    {ok, Client} = connect_to_redis(),
-    {ok, DeletedCount} = eredis:q(Client, ["DEL", ItemName]),
-    Result = case DeletedCount of
-        <<"0">> -> <<"Item ", ItemName/binary, " not found">>;
-        <<"1">> -> <<"Item ", ItemName/binary, " deleted successfully">>;
-        _ -> <<"Unexpected result: ", DeletedCount/binary>>
-    end,
-    
-    Req = cowboy_req:reply(200, #{<<"content-type">> => <<"application/json">>},
-        Result,
-        Req0),
-    {ok, Req, State}.
+    case info_handler:delete_item(ItemName) of
+        {ok, Response} ->
+            send_response(Req0, 200, Response, <<"application/json">>, State);
+        {error, <<"Item not found">>} ->
+            send_response(Req0, 404, <<"Item not found">>, <<"text/plain">>, State);
+        {error, Reason} ->
+            send_response(Req0, 500, Reason, <<"application/json">>, State)
+    end.
 
 handle_method_not_allowed(Req0, State) ->
-    Req = cowboy_req:reply(405,
-        #{<<"content-type">> => <<"text/plain">>},
-        <<"Method Not Allowed">>,
-        Req0),
-    {ok, Req, State}.
+    send_response(Req0, 405, <<"Method Not Allowed">>, <<"text/plain">>, State).
 
-connect_to_redis() ->
-    RedisHost = os:getenv("REDIS_HOST"),
-    RedisPort = os:getenv("REDIS_PORT"),
-    case eredis:start_link([{host, RedisHost}, {port, list_to_integer(RedisPort)}]) of
-        {ok, Client} ->
-            {ok, Client};
-        {error, Reason} ->
-            io:format("Failed to start Redis client: ~p~n", [Reason]),
-            {error, Reason}
-    end.
+send_response(Req0, StatusCode, Body, ContentType, State) ->
+    Req = cowboy_req:reply(StatusCode, #{<<"content-type">> => ContentType}, Body, Req0),
+    {ok, Req, State}.
