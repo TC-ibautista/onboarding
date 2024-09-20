@@ -13,7 +13,15 @@ init([Dispatch]) ->
         intensity => 1,
         period => 5
     },
+    PoolArgs = [
+        {name, {local, redis_pool}},
+        {worker_module, eredis},
+        {size, 10}, % Ajusta el tamaño del pool según tus necesidades
+        {max_overflow, 0}
+    ],
+    RedisChildSpec = poolboy:child_spec(redis_pool, PoolArgs, [{host, "localhost"}, {port, 6379}]),
     ChildSpecs = [
+        RedisChildSpec,
         #{id => http_listener,
           start => {cowboy, start_clear, [http_listener, [{port, 8080}], #{env => #{dispatch => Dispatch}}]},
           restart => permanent,
