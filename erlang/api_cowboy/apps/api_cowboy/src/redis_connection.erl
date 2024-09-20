@@ -2,9 +2,9 @@
 -export([connect/0]).
 
 connect() ->
-    RedisHost = os:getenv("REDIS_HOST"),
-    RedisPort = os:getenv("REDIS_PORT"),
-    case eredis:start_link([{host, RedisHost}, {port, list_to_integer(RedisPort)}]) of
+    {ok, RedisHost} = application:get_env(my_app, redis_host),
+    {ok, RedisPort} = application:get_env(my_app, redis_port),
+    case eredis:start_link([{host, RedisHost}, {port, RedisPort}]) of
         {ok, Client} ->
             {ok, Client};
         {error, Reason} ->
