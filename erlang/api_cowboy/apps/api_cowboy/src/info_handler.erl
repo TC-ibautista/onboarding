@@ -55,9 +55,16 @@ delete_item(ItemName) ->
 patch_item_price(ItemName, Item) ->
     ParsedItem = maps:from_list(jsx:decode(Item)),
     NewPrice = maps:get(<<"price">>, ParsedItem),
-    case db_operations:patch_item_price(ItemName, NewPrice) of
-        {ok, <<"OK">>} ->
-            {ok, <<"Item price updated successfully">>};
+    case get_item(ItemName) of 
+        {ok, CurrentItem} ->
+            ParsedCurrentItem = maps:from_list(jsx:decode(CurrentItem)),
+            UpdatedItem = maps:put(<<"price">>, NewPrice, ParsedCurrentItem),
+            case db_operations:update_item(ItemName, UpdatedItem) of
+                {ok, <<"OK">>} ->
+                    {ok, <<"Item price updated successfully">>};
+                {error, Reason} ->
+                    {error, Reason}
+            end;
         {error, <<"Item not found">>} ->
             {error, <<"Item not found">>};
         {error, Reason} ->
