@@ -5,9 +5,9 @@
 
 start(_StartType, _StartArgs) ->
     Routes = [
-        {"/", api_cowboy_handler, []},
-        {"/api/v1/items", api_cowboy_handler, []},
-        {"/api/v1/items/:name", api_cowboy_handler, []}
+        {"/", root_handler, []},
+        {"/api/v1/items", items_handler, []},
+        {"/api/v1/items/:name", items_handler, [has_name]}
     ],
     Dispatch = cowboy_router:compile([{'_', Routes}]),
     api_cowboy_sup:start_link(Dispatch).

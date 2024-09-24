@@ -1,5 +1,4 @@
 -module(api_cowboy_handler).
--behaviour(cowboy_handler).
 
 -export([init/2]).
 
@@ -7,8 +6,6 @@ init(Req0, State) ->
     Method = cowboy_req:method(Req0),
     Path = cowboy_req:path(Req0),
     case {Method, Path} of
-        {<<"GET">>, <<"/">>} ->
-            handle_root(Req0, State);
         {<<"GET">>, <<"/api/v1/items">>} ->
             handle_get_items(Req0, State);
         {<<"GET">>, <<"/api/v1/items/", ItemName/binary>>} ->
@@ -24,9 +21,6 @@ init(Req0, State) ->
         _ ->
             handle_method_not_allowed(Req0, State)
     end.
-
-handle_root(Req0, State) ->
-    send_response(Req0, 200, <<"Welcome to the API Cowboy!">>, <<"text/plain">>, State).
 
 handle_get_items(Req0, State) ->
     case info_handler:get_all_items() of

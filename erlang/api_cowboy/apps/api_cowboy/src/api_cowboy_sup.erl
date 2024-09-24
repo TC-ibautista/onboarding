@@ -16,7 +16,7 @@ init([Dispatch]) ->
     PoolArgs = [
         {name, {local, redis_pool}},
         {worker_module, eredis},
-        {size, 10}, % Ajusta el tamaño del pool según tus necesidades
+        {size, 10},
         {max_overflow, 0}
     ],
     RedisChildSpec = poolboy:child_spec(redis_pool, PoolArgs, [{host, "localhost"}, {port, 6379}]),
