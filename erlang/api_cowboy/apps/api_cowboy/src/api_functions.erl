@@ -59,10 +59,12 @@ patch_item_price(Req, State, ItemName) ->
 
 delete_item(Req, State, ItemName) ->
     case info_handler:delete_item(ItemName) of
-        {ok, Response} ->
+        {ok, true} ->
             SuccessMsg = #{<<"message">> => <<"Item deleted successfully">>},
             Req2 = cowboy_req:set_resp_body(jsx:encode(SuccessMsg), Req),
-            {Response, Req2, State};
+            {true, Req2, State};
         {error, Reason} ->
-            {Reason, Req, State}
+            ErrorMsg = #{<<"message">> => Reason},
+            Req2 = cowboy_req:set_resp_body(jsx:encode(ErrorMsg), Req),
+            {false, Req2, State}
     end.
