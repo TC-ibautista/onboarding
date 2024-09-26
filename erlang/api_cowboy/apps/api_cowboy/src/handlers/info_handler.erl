@@ -48,11 +48,8 @@ update_item(ItemName, ItemParsed) ->
 
 delete_item(ItemName) ->
     case db_operations:delete_item(ItemName) of
-        {ok, DeletedCount} ->
-            case DeletedCount of
-                <<"1">> -> {ok, true};
-                _ -> {ok, DeletedCount}
-            end;
+        {ok, <<"1">>} ->
+            {ok, true};
         {error, Reason} ->
             {error, Reason}
     end.

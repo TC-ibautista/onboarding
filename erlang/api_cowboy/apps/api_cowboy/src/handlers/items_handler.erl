@@ -30,14 +30,26 @@ content_types_provided(Req, State) ->
 from_json(Req, State = [has_name]) ->
     ItemName = cowboy_req:binding(name, Req),
     Method = cowboy_req:method(Req),
-    case Method of
-        <<"PUT">> ->
-            api_functions:put_item(Req, State, ItemName);
-        <<"PATCH">> ->
-            api_functions:patch_item_price(Req, State, ItemName)
+    {ok, Body, Req2} = cowboy_req:read_body(Req),
+    case validator:validate_request(Req2, Body) of
+        {ok, true} ->
+            case Method of
+                <<"PUT">> ->
+                    api_functions:put_item(Req2, State, ItemName, Body);
+                <<"PATCH">> ->
+                    api_functions:patch_item_price(Req2, State, ItemName, Body)
+            end;
+        {error, Reason} ->
+            send_errMessage(Req2, State, Reason)
     end;
 from_json(Req, State) ->
-    api_functions:post_item(Req, State).
+    {ok, Body, Req2} = cowboy_req:read_body(Req),
+    case validator:validate_request(Req2, Body) of
+        {ok, true} ->
+            api_functions:post_item(Req2, State, Body);
+        {error, Reason} ->
+            send_errMessage(Req2, State, Reason)
+    end.
 
 to_json(Req, State = [has_name]) ->
     ItemName = cowboy_req:binding(name, Req),
@@ -50,5 +62,8 @@ delete_resource(Req, State = [has_name]) ->
     api_functions:delete_item(Req, State, ItemName);
 delete_resource(Req, State) ->
     NoNameMessage = #{<<"message">> => <<"No item name binding found">>},
-    Req3 = cowboy_req:set_resp_body(jsx:encode(NoNameMessage), Req),
-    {false, Req3, State}.
+    send_errMessage(Req, State, NoNameMessage).
+
+send_errMessage(Req, State, Message) ->
+    Req2 = cowboy_req:set_resp_body(jsx:encode(Message), Req),
+    {false, Req2, State}.
