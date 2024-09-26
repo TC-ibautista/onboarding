@@ -43,15 +43,15 @@ validate_put_request(Req, Body) ->
 
 validate_post_request(Req, Body) ->
     Bindings = cowboy_req:bindings(Req),
-    case Bindings of
-        #{} ->
+    case maps:is_key(name, Bindings) of
+        false ->
             case jsx:decode(Body, [return_maps]) of
                 #{<<"name">> := Name, <<"price">> := Price} ->
                     validate_post_fields(Name, Price);
                 _ ->
                     {error, #{<<"message">> => <<"Invalid POST data">>}}
             end;
-        _ ->
+        true ->
             {error, #{<<"message">> => <<"Bindings should be empty for POST requests">>}}
     end.
 
