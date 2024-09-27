@@ -1,0 +1,15 @@
+{application, api_cowboy, [
+    {description, "An OTP application"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {mod, {api_cowboy_app, []}},
+    {applications, [
+        kernel,
+        stdlib,
+        ranch
+    ]},
+    {env, []},
+    {modules, []},
+    {licenses, ["Apache-2.0"]},
+    {links, []}
+ ]}.
