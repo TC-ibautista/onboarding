@@ -19,7 +19,7 @@ init([Dispatch]) ->
         {size, 10},
         {max_overflow, 0}
     ],
-    RedisChildSpec = poolboy:child_spec(redis_pool, PoolArgs, [{host, "localhost"}, {port, 6379}]),
+    RedisChildSpec = poolboy:child_spec(redis_pool, PoolArgs, [{host, "redis"}, {port, 6379}]),
     ChildSpecs = [
         RedisChildSpec,
         #{id => http_listener,

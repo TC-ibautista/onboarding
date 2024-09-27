@@ -7,9 +7,9 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-    {ok, RedisHost} = application:get_env(my_app, redis_host),
-    {ok, RedisPort} = application:get_env(my_app, redis_port),
-    {ok, RedisPoolSize} = application:get_env(my_app, redis_pool_size),
+    RedisHost = os:getenv("REDIS_HOST"),
+    RedisPort = os:getenv("REDIS_PORT"),
+    RedisPoolSize = os:getenv("REDIS_POOL_SIZE"),
     PoolArgs = [
         {name, {local, redis_pool}},
         {worker_module, eredis},
