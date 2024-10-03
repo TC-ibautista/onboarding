@@ -13,7 +13,7 @@ build:
 	docker-compose -f $(COMPOSE_FILE) build
 
 up:
-	docker-compose -f $(COMPOSE_FILE) up -d
+	docker compose run --service-ports --rm erlang_app bash
 
 down:
 	docker-compose -f $(COMPOSE_FILE) down
