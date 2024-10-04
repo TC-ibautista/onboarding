@@ -1,5 +1,7 @@
 # Usar una imagen base de Erlang
-FROM erlang:26
+# FROM erlang:26 # para correr rebar3 release
+# para solo correr la app
+FROM https://hub.docker.com/_/debian:bookworm
 
 # Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
